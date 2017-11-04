@@ -15,7 +15,8 @@ custom:
 functions:
   weigh:
     handler: handler._weigh
-    event:
+    events:
       - http:
           path: weigh
           method: post
+          integration: lambda
