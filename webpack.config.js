@@ -23,15 +23,7 @@ module.exports = {
                     'node_modules/',
                     /_serverless.*$/
                 ],
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [ 'babel-preset-env' ]
-                        }
-                    }
-
-                ]
+                use: [{ loader: 'babel-loader', }]
             }
         ]
     }
