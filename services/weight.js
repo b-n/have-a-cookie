@@ -13,9 +13,11 @@ class Weight extends Executable {
     }
 
     async httpPost(data) {
-        const existingData = await this.getAllData()
+        // eslint-disable-next-line
+        console.log(data)
+        const weight = data.data
 
-        const weight = data.weight
+        const existingData = await this.getAllData()
 
         const closestRecord = existingData.Count
             ? existingData.Items.sort((a, b) => this.getRelevanceScore(a, weight) - this.getRelevanceScore(b, weight))[0]
@@ -23,23 +25,26 @@ class Weight extends Executable {
 
         const isUpdate = closestRecord && Math.abs(closestRecord.weightedAverage - weight) < 5
 
-        const newRecord = this.addWeight(isUpdate ? closestRecord : this.getNewUser(), weight)
+        const newRecord = this.addWeight(isUpdate ? closestRecord : this.getNewUser(), data)
 
         await dynamoDb.put({ ...tableParams, Item: newRecord }).promise()
 
         return newRecord
     }
 
-    addWeight(data, weight) {
+    addWeight(user, data) {
+        const weight = data.data
+        const { coreid } = data
         return {
-            ...data,
+            ...user,
             weightedAverage: weight,
             weightedSd: 0.01,
             data: [
-                ...data.data,
+                ...user.data,
                 {
                     datetime: new Date(),
                     weight,
+                    device: coreid,
                 },
             ],
         }
