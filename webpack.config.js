@@ -1,7 +1,8 @@
 var nodeExternals = require('webpack-node-externals');
+const slsw = require('serverless-webpack');
 
 module.exports = {
-    entry: [ './handler.js' ],
+    entry: slsw.lib.entries,
     target: 'node',
     devtool: 'source-map',
     externals: [nodeExternals()],
