@@ -25,9 +25,9 @@ class Weight extends Executable {
 
         const newRecord = this.addWeight(isUpdate ? closestRecord : this.getNewUser(), weight)
 
-        const result = await dynamoDb.put({ ...tableParams, Item: newRecord }).promise()
+        await dynamoDb.put({ ...tableParams, Item: newRecord }).promise()
 
-        return result
+        return newRecord
     }
 
     addWeight(data, weight) {
