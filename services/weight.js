@@ -1,10 +1,15 @@
-import LambdaRouter from 'serverless-lambda-router'
+import LambdaRouter from '../../serverless-lambda-router/src/index'
 import Weight from '../controllers/weight'
 
 const controller = new Weight()
 
-const router = new LambdaRouter()
+const errorHandler = (response, err, event) => {
+    console.error(err)
+    return response
+}
 
-router.get('/weights', controller.addWeight)
+const router = new LambdaRouter({ onError: errorHandler })
 
-export const handler = router.handler()
+router.post('/weights', controller.addWeight)
+
+export const handle = router.handler()
