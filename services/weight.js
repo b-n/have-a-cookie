@@ -1,4 +1,4 @@
-import LambdaRouter from '../../serverless-lambda-router/src/index'
+import LambdaRouter from 'serverless-lambda-router'
 import Weight from '../controllers/weight'
 
 const controller = new Weight()
