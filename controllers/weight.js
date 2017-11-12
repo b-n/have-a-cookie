@@ -18,7 +18,7 @@ class Weight {
     }
 
     static getUserClosestToWeight(users, weight) {
-        const sortedUsersByRelevance = users.Items.sort((a, b) => Weight.getRelevanceScore(a, weight) - Weight.getRelevanceScore(b, weight))
+        const sortedUsersByRelevance = users.sort((a, b) => Weight.getRelevanceScore(a, weight) - Weight.getRelevanceScore(b, weight))
 
         const closestUser = sortedUsersByRelevance[0]
         return Math.abs(closestUser.weightedAverage - weight) < 5 ? closestUser : null
