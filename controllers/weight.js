@@ -4,13 +4,14 @@ class Weight {
     constructor() { }
 
     async addWeight({ event, response }) {
-        const { weight } = event.body
+        const body = JSON.parse(event.body)
+        const { weight } = body
 
         const existingData = await getAllUsers()
         const closestUser = existingData.Count ? Weight.getUserClosestToWeight(existingData.Items, weight) : null
 
         const userToAddWeightTo = closestUser ? closestUser : getNewUser()
-        const updatedRecord = addEntryToUser(userToAddWeightTo, event.body)
+        const updatedRecord = addEntryToUser(userToAddWeightTo, body)
 
         await setUser(updatedRecord)
 
@@ -18,7 +19,7 @@ class Weight {
     }
 
     static getUserClosestToWeight(users, weight) {
-        const sortedUsersByRelevance = users.Items.sort((a, b) => Weight.getRelevanceScore(a, weight) - Weight.getRelevanceScore(b, weight))
+        const sortedUsersByRelevance = users.sort((a, b) => Weight.getRelevanceScore(a, weight) - Weight.getRelevanceScore(b, weight))
 
         const closestUser = sortedUsersByRelevance[0]
         return Math.abs(closestUser.weightedAverage - weight) < 5 ? closestUser : null
