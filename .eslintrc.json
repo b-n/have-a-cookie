@@ -10,7 +10,8 @@
         "object-curly-spacing" : [ "error", "always" ],
         "semi" : [ "error", "never" ],
         "brace-style" : [ "error", "1tbs", { "allowSingleLine" : true } ],
-        "arrow-parens": [ "error", "as-needed" ]
+        "arrow-parens": [ "error", "as-needed" ],
+        "no-console": [ "error", { "allow" : [ "warn", "error" ] } ]
     },
     "parser": "babel-eslint",
     "plugins": []

@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk'
 import { v4 } from 'uuid'
-import { Executable } from '../lib/sls-sugar'
+import { Executable, Response } from '../lib/sls-sugar'
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient()
 const tableParams = {
@@ -13,9 +13,7 @@ class Weight extends Executable {
     }
 
     async httpPost(data) {
-        // eslint-disable-next-line
-        console.log(data)
-        const weight = data.data
+        const { weight } = data
 
         const existingData = await this.getAllData()
 
@@ -33,19 +31,14 @@ class Weight extends Executable {
     }
 
     addWeight(user, data) {
-        const weight = data.data
-        const { coreid } = data
+        const { weight } = data
         return {
             ...user,
             weightedAverage: weight,
             weightedSd: 0.01,
             data: [
                 ...user.data,
-                {
-                    datetime: new Date(),
-                    weight,
-                    device: coreid,
-                },
+                data,
             ],
         }
     }
@@ -69,13 +62,13 @@ class Weight extends Executable {
     }
 
     handle(props) {
-        const { method, body } = props.event
+        const { httpMethod, body } = props.event
 
-        switch (method) {
+        switch (httpMethod) {
             case 'POST':
                 return this.httpPost(body)
             default:
-                throw new Error('Method ' + method + ' does not exist.')
+                return new Response('Method ' + httpMethod + ' does not exist', 405)
         }
     }
 }

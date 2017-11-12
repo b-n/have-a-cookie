@@ -32,9 +32,20 @@ functions:
     handler: services/weight.handle
     events:
       - http:
-          path: weights
           method: post
-          integration: lambda
+          path: weights
+      - http:
+          method: get
+          path: weights
+      - http:
+          method: get
+          path: weights/{id}
+      - http:
+          method: put
+          path: weights/{id}
+      - http: 
+          method: delete
+          path: weights/{id}
 
 resources:
   Resources:
