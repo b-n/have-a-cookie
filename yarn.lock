@@ -3686,6 +3686,10 @@ semver@~5.0.1:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
 
+"serverless-lambda-router@git+ssh://git@github.com/nzchicken/serverless-lambda-router.git":
+  version "2.0.0"
+  resolved "git+ssh://git@github.com/nzchicken/serverless-lambda-router.git#4b008984b4f5a0b7c15ae761863d074ed8439659"
+
 serverless-webpack@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-4.0.0.tgz#a920f8e54359b1fcdf02491a3a5e39daf3515627"
