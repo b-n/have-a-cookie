@@ -19,10 +19,10 @@ provider:
       Action:
         - dynamodb:Query
         - dynamodb:Scan
+        - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-
 
 custom:
   webpackIncludeModules: true
@@ -34,18 +34,18 @@ functions:
       - http:
           method: post
           path: weights
+  user:
+    handler: services/user.handle
+    events:
       - http:
           method: get
-          path: weights
+          path: users
       - http:
           method: get
-          path: weights/{id}
+          path: users/{id}
       - http:
           method: put
-          path: weights/{id}
-      - http: 
-          method: delete
-          path: weights/{id}
+          path: users/{id}
 
 resources:
   Resources:
