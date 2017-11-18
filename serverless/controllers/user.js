@@ -1,10 +1,10 @@
-import { getUser, getUsersWithoutData } from '../models/user'
+import { getUser, getUserSummaries } from '../models/user'
 
 class User {
     constructor() { }
 
     async getUsers() {
-        return getUsersWithoutData()
+        return getUserSummaries()
     }
 
     async getUser({ event }) {
