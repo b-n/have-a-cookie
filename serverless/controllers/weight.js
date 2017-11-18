@@ -1,4 +1,4 @@
-import { getAllUsers, getNewUser, addEntryToUser, setUser, getUserWithoutData } from '../models/weight'
+import { getUsers, newUser, addEntryToUser, setUser, getUserWithoutData } from '../models/user'
 
 class Weight {
     constructor() { }
@@ -7,10 +7,10 @@ class Weight {
         const body = JSON.parse(event.body)
         const { weight } = body
 
-        const existingData = await getAllUsers()
+        const existingData = await getUsers()
         const closestUser = existingData.Count ? Weight.getUserClosestToWeight(existingData.Items, weight) : null
 
-        const userToAddWeightTo = closestUser ? closestUser : getNewUser()
+        const userToAddWeightTo = closestUser ? closestUser : newUser()
         const updatedRecord = addEntryToUser(userToAddWeightTo, body)
 
         await setUser(updatedRecord)
