@@ -6,9 +6,24 @@ const tableParams = {
     TableName: process.env.DYNAMODB_TABLE,
 }
 
-export const getAllUsers = () => dynamoDb.scan(tableParams).promise()
+export const getUsers = () => dynamoDb.scan(tableParams).promise()
 
-export const getNewUser = () => {
+export const getUsersWithoutData = async () => {
+    const users = await getUsers()
+
+    return users.Items.map(getUserWithoutData)
+}
+
+export const getUser = userId => dynamoDb.get({
+    ...tableParams,
+    Key: {
+        id: userId,
+    },
+}).promise()
+
+export const setUser = record => dynamoDb.put({ ...tableParams, Item: record }).promise()
+
+export const newUser = () => {
     const id = v4()
     return {
         id,
@@ -29,8 +44,6 @@ export const addEntryToUser = (user, data) => {
         ],
     }
 }
-
-export const setUser = record => dynamoDb.put({ ...tableParams, Item: record }).promise()
 
 export const getUserWithoutData = user => {
     const { id, name, weightedAverage, weightedSd } = user

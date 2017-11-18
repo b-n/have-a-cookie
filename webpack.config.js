@@ -5,6 +5,7 @@ module.exports = {
     entry: slsw.lib.entries,
     target: 'node',
     externals: [nodeExternals()],
+    devtool: 'source-map',
     module: {
         rules: [
             {
