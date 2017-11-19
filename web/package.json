@@ -10,27 +10,21 @@
     "dev": "preact watch",
     "lint": "eslint src"
   },
-  "eslintConfig": {
-    "extends": "eslint-config-synacor",
-    "rules": {
-      "no-unused-vars": "warn",
-      "react/sort-comp": "off",
-      "react/prefer-stateless-function": "off"
-    }
-  },
   "eslintIgnore": [
     "build/*"
   ],
   "devDependencies": {
     "eslint": "^4.5.0",
-    "eslint-config-synacor": "^1.1.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-react": "^7.5.0",
     "if-env": "^1.0.0",
     "preact-cli": "^2.0.0"
   },
   "dependencies": {
+    "d3": "^4.11.0",
     "preact": "^8.2.1",
     "preact-compat": "^3.17.0",
-    "preact-router": "^2.5.5",
-    "preact-material-components": "^1.2.4"
+    "preact-material-components": "^1.2.4",
+    "react-faux-dom": "^4.1.0"
   }
 }

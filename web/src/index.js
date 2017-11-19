@@ -1,4 +1,15 @@
-import './style';
-import App from './components/app';
+import {Component} from 'preact'
+import App from './containers/app'
+import 'preact-material-components/style.css'
 
-export default App;
+class Index extends Component {
+    render() {
+        return (
+            <div id="app">
+                <App />
+            </div>
+        )
+    }
+}
+
+export default Index
