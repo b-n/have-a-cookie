@@ -14,10 +14,11 @@ class HistoryChart extends Component {
 
     render() {
         const { chartText } = this.state
+        const { data } = this.props
         return (
             <div>
                 <button onClick={() => this.changeText()}>Toggle</button>
-                <LineChart text={chartText} />
+                <LineChart text={chartText} data={data}/>
             </div>
         )
     }

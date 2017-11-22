@@ -7,14 +7,6 @@ class LineChart extends Component {
         super()
         this.setState({
             secondsElapsed: 0,
-            data: [
-                {
-                    values: [
-                        { datetime: d3.timeSecond.offset(new Date(), -30), weight: 100 },
-                        { datetime: d3.timeSecond.offset(new Date(), -20), weight: 110 },
-                    ],
-                },
-            ],
         })
         this.tick = this.tick.bind(this)
     }
@@ -29,6 +21,9 @@ class LineChart extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+        if (this.props.data != prevProps.data) {
+            this.renderd3('update')
+        }
         if (this.state.secondsElapsed != prevState.secondsElapsed) {
             this.renderd3('update')
         }
@@ -53,7 +48,7 @@ class LineChart extends Component {
         const width = container.width - margin.left - margin.right
         const height = container.height - margin.top - margin.bottom
 
-        const { data } = this.state
+        const { data } = this.props
 
         const isRender = mode === 'render'
 
@@ -69,9 +64,10 @@ class LineChart extends Component {
                 .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
             : svg.select('g')
 
-        const x = d3.scaleTime().range([0, width]).domain([d3.timeMinute.offset(new Date(), -1), new Date()])
+        const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -5), new Date()])
         const y = d3.scaleLinear().range([height, 0]).domain([40, 130])
-        // const z = d3.scaleOrdinal(d3.schemeCategory10)
+        const z = d3.scaleOrdinal(d3.schemeCategory10)
+            .domain(data.map(user => user.id))
 
         const xAxis = d3.axisBottom()
             .scale(x)
@@ -101,9 +97,11 @@ class LineChart extends Component {
                 .call(xAxis)
         }
 
+        const strictIsoParse = d3.utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
+
         const line = d3.line()
-            .x(d => x(d.datetime))
-            .y(d => y(d.weight))
+            .x(d => x(strictIsoParse(d.datetime)))
+            .y(d => y(parseFloat(d.weight)))
 
 
         g.selectAll('.person')
@@ -113,14 +111,16 @@ class LineChart extends Component {
                 .append('path')
                     .attr('class', 'line')
                     .attr('clip-path', 'url(#clip)')
-                    .attr('d', d => line(d.values))
-                    .style('stroke', 'black')
+                    .attr('d', d => line(d.data))
+                    .style('stroke', d => z(d.id))
+                    .style('fill', 'none')
+                    .style('stroke-width', '2px')
 
         g.selectAll('.person')
             .select('path')
                 .transition()
                 .duration(800)
-                .attr('d', d=> line(d.values))
+                .attr('d', d=> line(d.data))
 
         this.props.animateFauxDOM(1000)
     }
