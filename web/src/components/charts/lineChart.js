@@ -30,8 +30,13 @@ class LineChart extends Component {
     }
 
     render() {
+        const { width, height } = this.props
+        const style = `
+            ${width != 'auto' ? 'width: ' + width + 'px;' : '' }
+            height: ${height}px;
+        `
         return (
-            <div ref={div => {this.chartDiv = div}} style="height: 400px;">
+            <div ref={div => {this.chartDiv = div}} style={style}>
                 {this.props.chart}
             </div>
         )
@@ -66,7 +71,10 @@ class LineChart extends Component {
 
         const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -5), new Date()])
         const y = d3.scaleLinear().range([height, 0])
-        const minMax = data[0] ? d3.extent(data[0].data, d => d.weight) : [0, 100]
+        const minMax = d3.extent(data.reduce((accumulator, currentValue) => {
+            return accumulator.concat(d3.extent(currentValue.data, d => parseFloat(d.weight)))
+        }, []))
+
         const adjustedMinMax = [minMax[0] * 0.99, minMax[1] * 1.01]
         y.domain(adjustedMinMax)
 
@@ -139,6 +147,10 @@ class LineChart extends Component {
 
 LineChart.defaultProps = {
     chart: 'loading',
+    width: 'auto',
+    height: 300,
+    updateInterval: null,
+    windowSize: [0, 0],
 }
 
 export default withFauxDOM(LineChart)
