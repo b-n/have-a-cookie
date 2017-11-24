@@ -8,7 +8,7 @@ class Weight {
         const { weight } = body
 
         const existingData = await getUsers()
-        const closestUser = existingData.Count ? Weight.getUserClosestToWeight(existingData.Items, weight) : null
+        const closestUser = existingData.Count ? Weight.getUserClosestToWeight(existingData, weight) : null
 
         const userToAddWeightTo = closestUser ? closestUser : newUser()
         const updatedRecord = addEntryToUser(userToAddWeightTo, body)
