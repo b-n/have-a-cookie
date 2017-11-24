@@ -16,7 +16,7 @@ class LineChart extends Component {
     }
 
     componentDidMount() {
-        this.interval = setInterval(this.tick, 1000)
+        // this.interval = setInterval(this.tick, 10000)
         this.renderd3('render')
     }
 
@@ -65,12 +65,19 @@ class LineChart extends Component {
             : svg.select('g')
 
         const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -5), new Date()])
-        const y = d3.scaleLinear().range([height, 0]).domain([40, 130])
+        const y = d3.scaleLinear().range([height, 0])
+        const minMax = data[0] ? d3.extent(data[0].data, d => d.weight) : [0, 100]
+        const adjustedMinMax = [minMax[0] * 0.99, minMax[1] * 1.01]
+        y.domain(adjustedMinMax)
+
         const z = d3.scaleOrdinal(d3.schemeCategory10)
             .domain(data.map(user => user.id))
 
         const xAxis = d3.axisBottom()
             .scale(x)
+
+        const yAxis = d3.axisLeft()
+            .scale(y)
 
         if (isRender) {
             g.append('g')
@@ -79,8 +86,8 @@ class LineChart extends Component {
                 .call(xAxis)
 
             g.append('g')
-                .attr('class', 'axis axix--y')
-                .call(d3.axisLeft(y))
+                .attr('class', 'axis axis--y')
+                .call(yAxis)
 
             g.append('clipPath')
                 .attr('id', 'clip')
@@ -95,6 +102,10 @@ class LineChart extends Component {
             g.select('g.axis--x').transition()
                 .duration(800)
                 .call(xAxis)
+
+            g.select('g.axis--y').transition()
+                .duration(800)
+                .call(yAxis)
         }
 
         const strictIsoParse = d3.utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
