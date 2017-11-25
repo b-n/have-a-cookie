@@ -1,5 +1,6 @@
 import {Component} from 'preact'
 import {utcParse} from 'd3-time-format'
+import debounce from 'debounce'
 
 import MediaCard from '../components/mediaCard'
 import {Grid, Cell} from '../components/grid'
@@ -13,7 +14,8 @@ export default class App extends Component {
     constructor() {
         super()
         this.setState({ users: [], windowSize: [0, 0] })
-        this.updateWindowDimensions = this.updateWindowDimensions.bind(this)
+        this.setWindowDimensions = this.setWindowDimensions.bind(this)
+        this.checkWindowDimensions = debounce(this.setWindowDimensions, 500)
     }
 
     componentDidMount() {
@@ -43,14 +45,14 @@ export default class App extends Component {
 
                 this.setState({ users: userData })
             })
-        window.addEventListener('resize', this.updateWindowDimensions)
+        window.addEventListener('resize', this.checkWindowDimensions)
     }
 
     componentWillUnmount() {
-        window.removeEventListener('resize', this.updateWindowDimensions)
+        window.removeEventListener('resize', this.checkWindowDimensions)
     }
 
-    updateWindowDimensions() {
+    setWindowDimensions(dimensions) {
         const w = window
         const d = document
         const documentElement = d.documentElement
