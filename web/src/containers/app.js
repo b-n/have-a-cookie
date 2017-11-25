@@ -1,4 +1,5 @@
 import {Component} from 'preact'
+import {utcParse} from 'd3-time-format'
 
 import MediaCard from '../components/mediaCard'
 import {Grid, Cell} from '../components/grid'
@@ -16,12 +17,31 @@ export default class App extends Component {
     }
 
     componentDidMount() {
+        const strictIsoParse = utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
+
         fetch('https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/users?includeHistory=true', { cors: true })
         .then(res => res.json())
             .then(res => {
-                const data = Object.values(res.payload)
+                const userData = Object.values(res.payload).map(user => {
+                    const { id, name, data } = user
+                    const dataPoints = data.map(dp => {
+                        const { weight, datetime, device } = dp
+                        return {
+                            weight: parseFloat(weight),
+                            datetime: strictIsoParse(datetime),
+                            device,
+                        }
+                    })
 
-                this.setState({ users: data })
+                    dataPoints.sort((a, b) => a.datetime - b.datetime)
+                    return {
+                        id,
+                        name,
+                        data: dataPoints,
+                    }
+                })
+
+                this.setState({ users: userData })
             })
         window.addEventListener('resize', this.updateWindowDimensions)
     }
