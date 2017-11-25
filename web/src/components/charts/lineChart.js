@@ -1,6 +1,7 @@
 import {Component} from 'preact'
 import * as d3 from 'd3'
 import {withFauxDOM} from 'react-faux-dom'
+import deepEqual from 'deep-equal'
 
 class LineChart extends Component {
     constructor() {
@@ -16,15 +17,16 @@ class LineChart extends Component {
     }
 
     componentDidMount() {
-        // this.interval = setInterval(this.tick, 10000)
+        if (this.props.updateInterval) {
+            this.interval = setInterval(this.tick, 10000)
+        }
         this.renderd3('render')
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.data != prevProps.data) {
-            this.renderd3('update')
-        }
-        if (this.state.secondsElapsed != prevState.secondsElapsed) {
+        if (!deepEqual(this.props.data, prevProps.data) ||
+            !deepEqual(this.props.windowSize, prevProps.windowSize) ||
+            this.state.secondsElapsed != prevState.secondsElapsed) {
             this.renderd3('update')
         }
     }
@@ -116,11 +118,9 @@ class LineChart extends Component {
                 .call(yAxis)
         }
 
-        const strictIsoParse = d3.utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
-
         const line = d3.line()
-            .x(d => x(strictIsoParse(d.datetime)))
-            .y(d => y(parseFloat(d.weight)))
+            .x(d => x(d.datetime))
+            .y(d => y(d.weight))
 
 
         g.selectAll('.person')
