@@ -15,7 +15,7 @@ export default class App extends Component {
         super()
         this.setState({ users: [], windowSize: [0, 0] })
         this.setWindowDimensions = this.setWindowDimensions.bind(this)
-        this.checkWindowDimensions = debounce(this.setWindowDimensions, 500)
+        this.checkWindowDimensions = debounce(this.setWindowDimensions, 300)
     }
 
     componentDidMount() {
@@ -29,6 +29,7 @@ export default class App extends Component {
                     const dataPoints = data.map(dp => {
                         const { weight, datetime, device } = dp
                         return {
+                            id,
                             weight: parseFloat(weight),
                             datetime: strictIsoParse(datetime),
                             device,
@@ -79,7 +80,7 @@ export default class App extends Component {
                         </MediaCard>
                     </Cell>
                     {users.map(user => (
-                        <Cell key={user.id} cols="6">
+                        <Cell key={user.id} cols="4">
                             <MediaCard title={user.name}>
                                 <HistoryChart data={[...user]} windowSize={windowSize} />
                             </MediaCard>
