@@ -4,6 +4,7 @@ import debounce from 'debounce'
 import MediaCard from '../components/mediaCard'
 import {Grid, Cell} from '../components/grid'
 import Api from '../services/api'
+import Iot from '../services/iot'
 
 import '../style'
 
@@ -17,11 +18,14 @@ export default class App extends Component {
         this.setWindowDimensions = this.setWindowDimensions.bind(this)
         this.checkWindowDimensions = debounce(this.setWindowDimensions, 300)
         this.api = new Api
+        this.iot = new Iot
     }
 
     componentDidMount() {
         this.api.getUsers()
             .then(userData => this.setState({ users: userData }))
+            .then(this.iot.connect)
+            .catch(e => console.error(e))
         window.addEventListener('resize', this.checkWindowDimensions)
     }
 

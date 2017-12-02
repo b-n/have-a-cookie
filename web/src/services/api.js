@@ -1,13 +1,12 @@
 import {utcParse} from 'd3-time-format'
+const apiUrl = 'https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/users?includeHistory=true'
 
 export default class Api {
     constructor() {}
 
     getUsers() {
         const strictIsoParse = utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
-        return fetch('https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/users?includeHistory=true', {
-                cors: true
-            })
+        return fetch(apiUrl, {cors: true})
             .then(res => res.json())
             .then(res => {
                 return Object.values(res.payload).map(user => {
@@ -31,5 +30,4 @@ export default class Api {
                 })
             })
     }
-
 }
