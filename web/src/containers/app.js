@@ -1,9 +1,9 @@
 import {Component} from 'preact'
-import {utcParse} from 'd3-time-format'
 import debounce from 'debounce'
 
 import MediaCard from '../components/mediaCard'
 import {Grid, Cell} from '../components/grid'
+import Api from '../services/api'
 
 import '../style'
 
@@ -16,36 +16,12 @@ export default class App extends Component {
         this.setState({ users: [], windowSize: [0, 0] })
         this.setWindowDimensions = this.setWindowDimensions.bind(this)
         this.checkWindowDimensions = debounce(this.setWindowDimensions, 300)
+        this.api = new Api
     }
 
     componentDidMount() {
-        const strictIsoParse = utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
-
-        fetch('https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/users?includeHistory=true', { cors: true })
-        .then(res => res.json())
-            .then(res => {
-                const userData = Object.values(res.payload).map(user => {
-                    const { id, name, data } = user
-                    const dataPoints = data.map(dp => {
-                        const { weight, datetime, device } = dp
-                        return {
-                            id,
-                            weight: parseFloat(weight),
-                            datetime: strictIsoParse(datetime),
-                            device,
-                        }
-                    })
-
-                    dataPoints.sort((a, b) => a.datetime - b.datetime)
-                    return {
-                        id,
-                        name,
-                        data: dataPoints,
-                    }
-                })
-
-                this.setState({ users: userData })
-            })
+        this.api.getUsers()
+            .then(userData => this.setState({ users: userData }))
         window.addEventListener('resize', this.checkWindowDimensions)
     }
 
