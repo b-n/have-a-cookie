@@ -10,7 +10,11 @@ const errorHandler = (response, err, event) => {
     return response
 }
 
-const router = new LambdaRouter({ onError: errorHandler })
+const invokeHandler = event => {
+    console.warn(event)
+}
+
+const router = new LambdaRouter({ onError: errorHandler, onInvoke: invokeHandler, headers: { 'Access-Control-Allow-Origin': '*' } })
 
 router.get('/users', controller.getUsers)
 router.get('/users/{id}', controller.getUser)

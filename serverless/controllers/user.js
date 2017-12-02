@@ -1,10 +1,14 @@
-import { getUser, getUserSummaries } from '../models/user'
+import { getUser, getUsers, getUserSummaries } from '../models/user'
 
 class User {
     constructor() { }
 
-    async getUsers() {
-        return getUserSummaries()
+    async getUsers({ event }) {
+        const includeHistory = event.queryStringParameters && event.queryStringParameters.includeHistory
+
+        return includeHistory
+            ? getUsers()
+            : getUserSummaries()
     }
 
     async getUser({ event }) {
