@@ -1,10 +1,14 @@
-import { getUser, getUsersWithoutData } from '../models/user'
+import { getUser, getUsers, getUsersWithoutData } from '../models/user'
 
 class User {
     constructor() { }
 
-    async getUsers() {
-        return getUsersWithoutData()
+    async getUsers({ event }) {
+        const includeHistory = event.queryStringParameters && event.queryStringParameters.includeHistory
+
+        return includeHistory
+            ? getUsers()
+            : getUsersWithoutData()
     }
 
     async getUser({ event }) {

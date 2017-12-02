@@ -6,12 +6,12 @@ const tableParams = {
     TableName: process.env.DYNAMODB_TABLE,
 }
 
-export const getUsers = () => dynamoDb.scan(tableParams).promise()
+export const getUsers = () => dynamoDb.scan(tableParams).promise().then(res => res.Items)
 
 export const getUsersWithoutData = async () => {
     const users = await getUsers()
 
-    return users.Items.map(getUserWithoutData)
+    return users.map(getUserWithoutData)
 }
 
 export const getUser = userId => dynamoDb.get({
