@@ -8,7 +8,7 @@ const tableParams = {
 
 export const getUsers = () => dynamoDb.scan(tableParams).promise().then(res => res.Items)
 
-export const getUsersWithoutData = async () => {
+export const getUserSummaries = async () => {
     const users = await getUsers()
 
     return users.map(getUserWithoutData)
