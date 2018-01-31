@@ -2,10 +2,11 @@ import {Component} from 'preact'
 import {utcParse} from 'd3-time-format'
 import debounce from 'debounce'
 
-import MediaCard from '../components/mediaCard'
-import {Grid, Cell} from '../components/grid'
+import config from '../config'
 
 import '../style'
+import MediaCard from '../components/mediaCard'
+import {Grid, Cell} from '../components/grid'
 
 import Header from '../components/header'
 import HistoryChart from '../components/historyChart'
@@ -21,7 +22,7 @@ export default class App extends Component {
     componentDidMount() {
         const strictIsoParse = utcParse('%Y-%m-%dT%H:%M:%S.%LZ')
 
-        fetch('https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/users?includeHistory=true', { cors: true })
+        fetch(config.server_url + '/users?includeHistory=true', { cors: true })
         .then(res => res.json())
             .then(res => {
                 const userData = Object.values(res.payload).map(user => {

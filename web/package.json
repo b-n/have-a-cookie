@@ -7,7 +7,8 @@
     "build": "preact build",
     "serve": "preact build && preact serve",
     "dev": "preact watch",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "publish": "preact build && aws s3 cp build/ s3://have-a-cookie/ --recursive"
   },
   "eslintIgnore": [
     "build/*"
