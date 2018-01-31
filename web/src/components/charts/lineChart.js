@@ -118,6 +118,10 @@ class LineChart extends Component {
                 .call(yAxis)
         }
 
+        const lineZero = d3.line()
+            .x(d => x(d.datetime))
+            .y(d => y(0))
+
         const line = d3.line()
             .x(d => x(d.datetime))
             .y(d => y(d.weight))
@@ -132,7 +136,7 @@ class LineChart extends Component {
             .append('path')
               .attr('class', 'line')
               .attr('clip-path', 'url(#clip)')
-              .attr('d', d => line(d.data))
+              .attr('d', d => lineZero(d.data))
               .style('stroke', d => z(d.id))
               .style('fill', 'none')
               .style('stroke-width', '2px')
@@ -144,7 +148,7 @@ class LineChart extends Component {
                 .attr('fill', d => z(d.id))
                 .attr('r', 0)
                 .attr('cx', d => x(d.datetime))
-                .attr('cy', d => y(d.weight))
+                .attr('cy', d => y(0))
 
         g.selectAll('.person')
             .selectAll('circle')
