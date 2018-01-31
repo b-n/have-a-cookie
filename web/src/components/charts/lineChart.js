@@ -71,7 +71,7 @@ class LineChart extends Component {
                 .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
             : svg.select('g')
 
-        const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -5), new Date()])
+        const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -56), new Date()])
         const y = d3.scaleLinear().range([height, 0])
         const minMax = d3.extent(data.reduce((accumulator, currentValue) => {
             return accumulator.concat(d3.extent(currentValue.data, d => parseFloat(d.weight)))
