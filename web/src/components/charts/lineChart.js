@@ -71,14 +71,14 @@ class LineChart extends Component {
                 .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
             : svg.select('g')
 
-        const x = d3.scaleTime().range([0, width]).domain([d3.timeDay.offset(new Date(), -56), new Date()])
-        const y = d3.scaleLinear().range([height, 0])
-        const minMax = d3.extent(data.reduce((accumulator, currentValue) => {
-            return accumulator.concat(d3.extent(currentValue.data, d => parseFloat(d.weight)))
-        }, []))
-
-        const adjustedMinMax = [minMax[0] * 0.99, minMax[1] * 1.01]
-        y.domain(adjustedMinMax)
+        const x = d3.scaleTime()
+            .range([0, width])
+            .domain([d3.timeDay.offset(new Date(), -94), new Date()])
+        const y = d3.scaleLinear()
+            .range([height, 0])
+            .domain(d3.extent(
+                data.reduce((a,c) => a.concat(c.data.map(d => d.weight)), [])
+            ).map((d, i) => d * (1+(i*2-1)/100)))
 
         const z = d3.scaleOrdinal(d3.schemeCategory10)
             .domain(data.map(user => user.id))
@@ -129,10 +129,14 @@ class LineChart extends Component {
 
         const users = g.selectAll('.person')
             .data(data, d => d.id)
-            .enter().append('g')
+            
+            
+        const newUserGroups = users.enter()
+            .append('g')
                 .attr('class', 'person')
 
-        users
+        //set up line and markers
+        newUserGroups
             .append('path')
               .attr('class', 'line')
               .attr('clip-path', 'url(#clip)')
@@ -141,21 +145,21 @@ class LineChart extends Component {
               .style('fill', 'none')
               .style('stroke-width', '2px')
 
-        users.selectAll('circle')
+        newUserGroups
+            .selectAll('circle')
             .data(d => d.data)
             .enter().append('circle')
                 .attr('clip-path', 'url(#clip)')
                 .attr('fill', d => z(d.id))
-                .attr('r', 0)
+                .attr('r', 3)
                 .attr('cx', d => x(d.datetime))
                 .attr('cy', d => y(0))
 
+        //animate transition(s)
         g.selectAll('.person')
             .selectAll('circle')
                 .transition()
                 .duration(800)
-                .attr('r', 3)
-                .attr('cx', d => x(d.datetime))
                 .attr('cy', d => y(d.weight))
 
         g.selectAll('.person')
