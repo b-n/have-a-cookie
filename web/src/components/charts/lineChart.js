@@ -2,20 +2,37 @@ import {Component} from 'preact'
 import * as d3 from 'd3'
 import {withFauxDOM} from 'react-faux-dom'
 import deepEqual from 'deep-equal'
+import debounce from 'debounce'
 
 class LineChart extends Component {
     constructor() {
         super()
         this.setState({
             secondsElapsed: 0,
-            width: null,
-            height: null,
-            margin: {},
-            scales: {},
+            chart: {
+                svg: null,
+                width: null,
+                height: null,
+                margin: null,
+                drawArea: null,
+            },
+            scales: {
+                x: null,
+                y: null,
+                group: null,
+            },
         })
         this.tick = this.tick.bind(this)
         this.getBoundingBoxes = this.getBoundingBoxes.bind(this)
+
+        this.windowSizeChanged = this.windowSizeChanged.bind(this)
+        this.onWindowResize =debounce(this.windowSizeChanged, 300)
     }
+
+    windowSizeChanged() {
+        this.renderd3('update')
+    }
+
 
     tick() {
         this.setState({ secondsElapsed: this.state.secondsElapsed + 1 })
@@ -26,11 +43,16 @@ class LineChart extends Component {
             this.interval = setInterval(this.tick, this.props.updateInterval)
         }
         this.renderd3('render')
+
+        window.addEventListener('resize', this.onWindowResize)
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onWindowResize)
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (!deepEqual(this.props.data, prevProps.data) ||
-            !deepEqual(this.props.windowSize, prevProps.windowSize) ||
             this.state.secondsElapsed != prevState.secondsElapsed) {
             this.renderd3('update')
         }
@@ -213,7 +235,6 @@ LineChart.defaultProps = {
     width: 'auto',
     height: 300,
     updateInterval: null,
-    windowSize: [0, 0],
 }
 
 export default withFauxDOM(LineChart)
