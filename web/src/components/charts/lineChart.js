@@ -8,8 +8,13 @@ class LineChart extends Component {
         super()
         this.setState({
             secondsElapsed: 0,
+            width: null,
+            height: null,
+            margin: {},
+            scales: {},
         })
         this.tick = this.tick.bind(this)
+        this.getBoundingBoxes = this.getBoundingBoxes.bind(this)
     }
 
     tick() {
@@ -18,7 +23,7 @@ class LineChart extends Component {
 
     componentDidMount() {
         if (this.props.updateInterval) {
-            this.interval = setInterval(this.tick, 10000)
+            this.interval = setInterval(this.tick, this.props.updateInterval)
         }
         this.renderd3('render')
     }
@@ -44,9 +49,37 @@ class LineChart extends Component {
         )
     }
 
-    renderd3(mode) {
-        const faux = this.props.connectFauxDOM('div', 'chart')
+    getSvg(faux, isRender) {
+        const svg = isRender
+            ? d3.select(faux).append('svg')
+            : d3.select(faux).select('svg')
 
+        svg.attr('width', this.chartDiv.offsetWidth)
+            .attr('height', this.chartDiv.offsetHeight)
+
+        return svg
+    }
+
+    getDrawArea(svg, isRender) {
+        const { margin, width, height } = this.getBoundingBoxes()
+
+        const g = isRender
+            ? svg.append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+            : svg.select('g')
+
+        const clipPath = isRender
+            ? g.append('clipPath').append('rect')
+            : g.select('clipPath').select('rect')
+
+        clipPath
+            .attr('width', width)
+            .attr('height', height)
+
+        return g
+    }
+
+    getBoundingBoxes() {
         const container = {
             width: this.chartDiv.offsetWidth,
             height: this.chartDiv.offsetHeight,
@@ -55,34 +88,32 @@ class LineChart extends Component {
         const width = container.width - margin.left - margin.right
         const height = container.height - margin.top - margin.bottom
 
-        const { data } = this.props
+        return {
+            width,
+            height,
+            margin,
+        }
+    }
 
-        const isRender = mode === 'render'
-
-        const svg = isRender
-            ? d3.select(faux).append('svg')
-            : d3.select(faux).select('svg')
-
-        svg.attr('width', container.width)
-            .attr('height', container.height)
-
-        const g = isRender
-            ? svg.append('g')
-                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
-            : svg.select('g')
-
+    getScales(data) {
+        const { width, height } = this.getBoundingBoxes()
         const x = d3.scaleTime()
             .range([0, width])
             .domain([d3.timeDay.offset(new Date(), -94), new Date()])
         const y = d3.scaleLinear()
             .range([height, 0])
             .domain(d3.extent(
-                data.reduce((a,c) => a.concat(c.data.map(d => d.weight)), [])
+                data.reduce((a, c) => a.concat(c.data.map(d => d.weight)), [])
             ).map((d, i) => d * (1+(i*2-1)/100)))
 
         const z = d3.scaleOrdinal(d3.schemeCategory10)
             .domain(data.map(user => user.id))
 
+        return { x, y, z }
+    }
+
+    drawAxises(data, drawArea, { x, y }, isRender) {
+        const { height } = this.getBoundingBoxes()
         const xAxis = d3.axisBottom()
             .scale(x)
 
@@ -90,33 +121,38 @@ class LineChart extends Component {
             .scale(y)
 
         if (isRender) {
-            g.append('g')
+            drawArea.append('g')
                 .attr('class', 'axis axis--x')
                 .attr('transform', 'translate(0, ' + height + ')')
                 .call(xAxis)
 
-            g.append('g')
+            drawArea.append('g')
                 .attr('class', 'axis axis--y')
                 .call(yAxis)
-
-            g.append('clipPath')
-                .attr('id', 'clip')
-                .append('rect')
-                    .attr('width', width)
-                    .attr('height', height)
         } else {
-            g.select('#clip').select('rect')
-                .attr('width', width)
-                .attr('height', height)
-
-            g.select('g.axis--x').transition()
+            drawArea.select('g.axis--x').transition()
                 .duration(800)
                 .call(xAxis)
 
-            g.select('g.axis--y').transition()
+            drawArea.select('g.axis--y').transition()
                 .duration(800)
                 .call(yAxis)
         }
+    }
+
+    renderd3(mode) {
+        const faux = this.props.connectFauxDOM('div', 'chart')
+
+        const { data } = this.props
+        const { x, y, z } = this.getScales(data)
+
+        const isRender = mode === 'render'
+
+        const svg = this.getSvg(faux, isRender)
+        const g = this.getDrawArea(svg, isRender)
+
+        this.drawAxises(data, g, { x, y }, isRender)
+
 
         const lineZero = d3.line()
             .x(d => x(d.datetime))
@@ -129,13 +165,12 @@ class LineChart extends Component {
 
         const users = g.selectAll('.person')
             .data(data, d => d.id)
-            
-            
+
         const newUserGroups = users.enter()
             .append('g')
                 .attr('class', 'person')
 
-        //set up line and markers
+        // set up line and markers
         newUserGroups
             .append('path')
               .attr('class', 'line')
@@ -155,12 +190,13 @@ class LineChart extends Component {
                 .attr('cx', d => x(d.datetime))
                 .attr('cy', d => y(0))
 
-        //animate transition(s)
+        // animate transition(s)
         g.selectAll('.person')
             .selectAll('circle')
-                .transition()
-                .duration(800)
-                .attr('cy', d => y(d.weight))
+            .transition()
+            .duration(800)
+            .attr('cx', d => x(d.datetime))
+            .attr('cy', d => y(d.weight))
 
         g.selectAll('.person')
             .select('path')
