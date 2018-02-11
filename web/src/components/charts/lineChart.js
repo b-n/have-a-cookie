@@ -4,7 +4,8 @@ import deepEqual from 'deep-equal'
 import debounce from 'debounce'
 
 import { select } from 'd3-selection'
-import { scaleTime, scaleLinear, scaleOrdinal, schemeCategory10 } from 'd3-scale'
+import { scaleTime, scaleLinear, scaleOrdinal } from 'd3-scale'
+import { schemeSet2 } from 'd3-scale-chromatic'
 import { extent, min } from 'd3-array'
 import { axisBottom, axisLeft } from 'd3-axis'
 import { line } from 'd3-shape'
@@ -122,7 +123,7 @@ class LineChart extends Component {
             scales: {
                 x: scaleTime(),
                 y: scaleLinear(),
-                group: scaleOrdinal(schemeCategory10),
+                group: scaleOrdinal(schemeSet2),
             },
         })
         this.setScaleDomain(data)
