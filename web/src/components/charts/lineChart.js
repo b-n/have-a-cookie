@@ -1,48 +1,59 @@
 import {Component} from 'preact'
-import * as d3 from 'd3'
 import {withFauxDOM} from 'react-faux-dom'
 import deepEqual from 'deep-equal'
 import debounce from 'debounce'
+
+import { select } from 'd3-selection'
+import { scaleTime, scaleLinear, scaleOrdinal, schemeCategory10 } from 'd3-scale'
+import { extent, min } from 'd3-array'
+import { axisBottom, axisLeft } from 'd3-axis'
+import { line } from 'd3-shape'
+import 'd3-transition'
+
+import { flattenData, padArray } from '../../lib/array'
+import { getChartSizesFromElem, setElemSize, drawChartArea, setClipPathSize, drawAxes, updateAxes } from './lib'
 
 class LineChart extends Component {
     constructor() {
         super()
         this.setState({
-            secondsElapsed: 0,
-            chart: {
-                svg: null,
+            isRendering: true,
+            container: {
                 width: null,
                 height: null,
-                margin: null,
-                drawArea: null,
+            },
+            chart: {
+                width: null,
+                height: null,
+                margin: {
+                    top: null,
+                    right: null,
+                    bottom: null,
+                    left: null,
+                },
             },
             scales: {
                 x: null,
                 y: null,
                 group: null,
             },
+            axes: {
+                x: null,
+                y: null,
+            },
         })
-        this.tick = this.tick.bind(this)
-        this.getBoundingBoxes = this.getBoundingBoxes.bind(this)
 
-        this.windowSizeChanged = this.windowSizeChanged.bind(this)
-        this.onWindowResize =debounce(this.windowSizeChanged, 300)
-    }
+        this.onTick = this.onTick.bind(this)
+        this.onWindowResized = this.onWindowResized.bind(this)
 
-    windowSizeChanged() {
-        this.renderd3('update')
-    }
-
-
-    tick() {
-        this.setState({ secondsElapsed: this.state.secondsElapsed + 1 })
+        this.onWindowResize = debounce(this.onWindowResized, 300)
     }
 
     componentDidMount() {
         if (this.props.updateInterval) {
-            this.interval = setInterval(this.tick, this.props.updateInterval)
+            this.interval = setInterval(this.onTick, this.props.updateInterval)
         }
-        this.renderd3('render')
+        this.onInit()
 
         window.addEventListener('resize', this.onWindowResize)
     }
@@ -52,10 +63,100 @@ class LineChart extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (!deepEqual(this.props.data, prevProps.data) ||
-            this.state.secondsElapsed != prevState.secondsElapsed) {
-            this.renderd3('update')
+        if (!deepEqual(this.props.data, prevProps.data)) {
+            this.onDataChanged()
         }
+    }
+
+    onInit() {
+        this.setState(getChartSizesFromElem(this.chartDiv))
+        this.setScales(this.props.data, this.state.chart)
+        this.setAxes()
+
+        const svg = this.getSvg()
+        setElemSize(svg, this.state.container)
+
+        const chartArea = drawChartArea(svg, this.state.chart.margin)
+        setClipPathSize(chartArea, this.state.chart)
+        drawAxes(chartArea, this.state.axes, this.state.chart.height)
+
+        this.renderd3(chartArea)
+        this.setState({ isRendering: false })
+    }
+
+    onWindowResized() {
+        this.setState(getChartSizesFromElem(this.chartDiv))
+        this.setScaleRange(this.state.chart)
+
+        const svg = this.getSvg()
+        setElemSize(svg, this.state.container)
+
+        const chartArea = svg.select('g')
+        setClipPathSize(chartArea, this.state.chart)
+        this.renderd3(chartArea)
+    }
+
+    onDataChanged() {
+        this.setScaleDomain(this.props.data)
+
+        const svg = this.getSvg()
+        this.renderd3(svg.select('g'))
+    }
+
+    onTick() {
+        const svg = this.getSvg()
+        this.renderd3(svg.select('g'))
+    }
+
+
+    getSvg() {
+        const { isRendering } = this.state
+        const faux = this.props.connectFauxDOM('div', 'chart')
+        return isRendering
+            ? select(faux).append('svg')
+            : select(faux).select('svg')
+    }
+
+    setScales(data, { width, height }) {
+        this.setState({
+            scales: {
+                x: scaleTime(),
+                y: scaleLinear(),
+                group: scaleOrdinal(schemeCategory10),
+            },
+        })
+        this.setScaleDomain(data)
+        this.setScaleRange({ width, height })
+    }
+
+    setScaleDomain(data) {
+        const flatData = flattenData(data)
+        const { x, y, group } = this.state.scales
+
+        x.domain([min(flatData, d => d.datetime), new Date()])
+        y.domain(padArray(extent(flatData, d => d.weight), 0.01))
+        group.domain(data.map(d => d.id))
+
+        this.setState({ scales: { x, y, group }})
+    }
+
+    setScaleRange({ width, height }) {
+        const { x, y } = this.state.scales
+
+        x.range([0, width])
+        y.range([height, 0])
+
+        this.setState({ scales: { ...this.state.scales, x, y }})
+    }
+
+    setAxes() {
+        const { x, y } = this.state.scales
+        this.setState({
+            axes: {
+                x: axisBottom().scale(x),
+                y: axisLeft().scale(y),
+            },
+        })
     }
 
     render() {
@@ -71,120 +172,61 @@ class LineChart extends Component {
         )
     }
 
-    getSvg(faux, isRender) {
-        const svg = isRender
-            ? d3.select(faux).append('svg')
-            : d3.select(faux).select('svg')
-
-        svg.attr('width', this.chartDiv.offsetWidth)
-            .attr('height', this.chartDiv.offsetHeight)
-
-        return svg
-    }
-
-    getDrawArea(svg, isRender) {
-        const { margin, width, height } = this.getBoundingBoxes()
-
-        const g = isRender
-            ? svg.append('g')
-                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
-            : svg.select('g')
-
-        const clipPath = isRender
-            ? g.append('clipPath').append('rect')
-            : g.select('clipPath').select('rect')
-
-        clipPath
-            .attr('width', width)
-            .attr('height', height)
-
-        return g
-    }
-
-    getBoundingBoxes() {
-        const container = {
-            width: this.chartDiv.offsetWidth,
-            height: this.chartDiv.offsetHeight,
-        }
-        const margin = { top: 20, right: 20, bottom: 30, left: 50 }
-        const width = container.width - margin.left - margin.right
-        const height = container.height - margin.top - margin.bottom
-
-        return {
-            width,
-            height,
-            margin,
-        }
-    }
-
-    getScales(data) {
-        const { width, height } = this.getBoundingBoxes()
-        const x = d3.scaleTime()
-            .range([0, width])
-            .domain([d3.timeDay.offset(new Date(), -94), new Date()])
-        const y = d3.scaleLinear()
-            .range([height, 0])
-            .domain(d3.extent(
-                data.reduce((a, c) => a.concat(c.data.map(d => d.weight)), [])
-            ).map((d, i) => d * (1+(i*2-1)/100)))
-
-        const z = d3.scaleOrdinal(d3.schemeCategory10)
-            .domain(data.map(user => user.id))
-
-        return { x, y, z }
-    }
-
-    drawAxises(data, drawArea, { x, y }, isRender) {
-        const { height } = this.getBoundingBoxes()
-        const xAxis = d3.axisBottom()
-            .scale(x)
-
-        const yAxis = d3.axisLeft()
-            .scale(y)
-
-        if (isRender) {
-            drawArea.append('g')
-                .attr('class', 'axis axis--x')
-                .attr('transform', 'translate(0, ' + height + ')')
-                .call(xAxis)
-
-            drawArea.append('g')
-                .attr('class', 'axis axis--y')
-                .call(yAxis)
-        } else {
-            drawArea.select('g.axis--x').transition()
-                .duration(800)
-                .call(xAxis)
-
-            drawArea.select('g.axis--y').transition()
-                .duration(800)
-                .call(yAxis)
-        }
-    }
-
-    renderd3(mode) {
-        const faux = this.props.connectFauxDOM('div', 'chart')
-
+    renderd3(g) {
         const { data } = this.props
-        const { x, y, z } = this.getScales(data)
+        const { x, y, group } = this.state.scales
 
-        const isRender = mode === 'render'
+        updateAxes(g, this.state.axes, this.state.isRendering)
 
-        const svg = this.getSvg(faux, isRender)
-        const g = this.getDrawArea(svg, isRender)
-
-        this.drawAxises(data, g, { x, y }, isRender)
-
-
-        const lineZero = d3.line()
+        const lineZero = line()
             .x(d => x(d.datetime))
             .y(d => y(0))
 
-        const line = d3.line()
+        const lineWeight = line()
             .x(d => x(d.datetime))
             .y(d => y(d.weight))
 
+        // grids
+        const { width, height } = this.state.chart
+        g.selectAll('.grid-y')
+            .data(y.ticks())
+            .enter()
+              .append('line')
+                .attr('class', 'grid grid-y')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', height)
+                .attr('y2', height)
+                .style('stroke-opacity', 0.0)
 
+        g.selectAll('.grid-x')
+            .data(x.ticks())
+            .enter()
+              .append('line')
+                .attr('class', 'grid grid-x')
+                .attr('x1', 0)
+                .attr('x2', 0)
+                .attr('y1', 0)
+                .attr('y2', height)
+                .style('stroke-opacity', 0.0)
+
+        g.selectAll('.grid-y')
+            .transition()
+            .duration(800)
+                .attr('x2', width)
+                .attr('y1', d => y(d))
+                .attr('y2', d => y(d))
+                .style('stroke-opacity', 1)
+
+        g.selectAll('.grid-x')
+            .transition()
+            .duration(800)
+                .attr('x1', d => x(d))
+                .attr('x2', d => x(d))
+                .attr('y2', height)
+                .style('stroke-opacity', 1)
+
+        // data!
         const users = g.selectAll('.person')
             .data(data, d => d.id)
 
@@ -198,7 +240,7 @@ class LineChart extends Component {
               .attr('class', 'line')
               .attr('clip-path', 'url(#clip)')
               .attr('d', d => lineZero(d.data))
-              .style('stroke', d => z(d.id))
+              .style('stroke', d => group(d.id))
               .style('fill', 'none')
               .style('stroke-width', '2px')
 
@@ -207,7 +249,7 @@ class LineChart extends Component {
             .data(d => d.data)
             .enter().append('circle')
                 .attr('clip-path', 'url(#clip)')
-                .attr('fill', d => z(d.id))
+                .attr('fill', d => group(d.id))
                 .attr('r', 3)
                 .attr('cx', d => x(d.datetime))
                 .attr('cy', d => y(0))
@@ -224,7 +266,7 @@ class LineChart extends Component {
             .select('path')
                 .transition()
                 .duration(800)
-                .attr('d', d=> line(d.data))
+                .attr('d', d=> lineWeight(d.data))
 
         this.props.animateFauxDOM(1000)
     }

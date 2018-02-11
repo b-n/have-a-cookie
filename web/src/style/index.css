@@ -42,3 +42,10 @@ html, body {
 #app {
 	height: 100%;
 }
+
+
+.grid {
+    stroke: #cfcfcf;
+    shape-rendering: crispEdges;
+    stroke-width: 1px;
+}
