@@ -43,8 +43,9 @@ const LineChart = ({
       width={width}
       marginLeft={50}
       marginRight={30}
+      marginTop={50}
     >
-      <Text>{title}</Text>
+      <Text className="title" x={10} y={-10}>{title}</Text>
       <AxisBottom
         scale={scaleX}
         gridlines
@@ -54,8 +55,9 @@ const LineChart = ({
         gridlines
       />
       <Line
-        x={d => scaleX(Date.parse(d.datetime))}
-        y={d => scaleY(+d.weight)}
+        x={d => scaleX(xAccessor(d))}
+        y={d => scaleY(yAccessor(d))}
+        accessor={dataAccessor}
         data={data}
         animate
       />

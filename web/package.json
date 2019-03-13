@@ -1,12 +1,14 @@
 {
-  "name": "All the scales",
+  "name": "have-a-cookie",
   "version": "1.0.0",
+  "homepage": "https://nzchicken.github.io/have-a-cookie",
   "dependencies": {
     "@potion/element": "^1.0.0-next.0",
     "@potion/layout": "^1.0.0-next.0",
     "d3": "^5.9.1",
     "date-fns": "^2.0.0-alpha.27",
     "debounce": "^1.2.0",
+    "gh-pages": "^2.0.1",
     "normalize.css": "^8.0.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
@@ -15,6 +17,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
