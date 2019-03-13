@@ -1,5 +1,3 @@
-import { useWeightData } from './weightData';
+export { useWeightData } from './weightData';
+export { hash } from './hash';
 
-export {
-  useWeightData,
-}

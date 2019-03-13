@@ -1,0 +1,13 @@
+.gridline {
+  stroke: #dde;
+  stroke-width: 1px;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1px;
+}
+
+.point {
+  r: 1.5;
+}

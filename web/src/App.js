@@ -1,13 +1,9 @@
 import React from 'react';
-import { useWeightData } from './lib';
 
-const App = () => {
-  const data = useWeightData({includeHistory: true});
-  console.log(data);
+import { Home } from './pages';
 
-  return (
-    <div>Hello World</div>
-  )
-}
+const App = () => (
+  <Home />
+)
 
 export default App;

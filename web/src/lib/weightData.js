@@ -19,7 +19,7 @@ const useWeightData = ({includeHistory = true}) => {
       }
     )
       .then(res => res.json())
-      .then(res => setData(res));
+      .then(res => setData(Object.values(res.payload)));
   }, [includeHistory]);
 
   return data;
