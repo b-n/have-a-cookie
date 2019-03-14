@@ -6,7 +6,7 @@ const useWindowDimensions = () => {
 
   useEffect(() => {
     window.addEventListener('resize', debounce(() => {
-      setDimensions([window.innerWidth, window.innerHeight]);
+      setDimensions([document.body.clientWidth, document.body.clientHeight]);
     }, 500));
   }, [])
 
