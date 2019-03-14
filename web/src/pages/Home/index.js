@@ -17,7 +17,7 @@ const Home = () => {
   const lineColors = useOrdinalScale({domain: ids, range: schemeSet1 })
 
   const graphData = allData.map(d => {
-    const start = +d.data[0].weight;
+    const start = d.initialReading || +d.data[0].weight;
     const data = d.data.map(e => ({ ...e, weight: +e.weight, relative: +e.weight - start, datetime: Date.parse(e.datetime)}))
     
     return {
