@@ -5,29 +5,37 @@ import { useWeightData } from '../../lib'
 import { LineChart } from '../common'
 import { useWindowDimensions, useOrdinalScale } from '../../hooks'
 
-
 import './Home.css'
 
+const formatDataForGraph = (d, lineColors) => {
+  
+  const {
+    initialReading = +d.data[0].weight,
+    data,
+    id
+  } = d;
+
+  return {
+    ...d,
+    key: id,
+    data: data.map(e => ({
+      ...e,
+      weight: +e.weight,
+      relative: +e.weight - initialReading,
+      datetime: Date.parse(e.datetime)
+    })),
+    color: lineColors(id) 
+  }
+}
+
 const Home = () => {
-  const allData = useWeightData({includeHistory: true});
 
   const [ width ] = useWindowDimensions();
 
-  const ids = allData.map(d => d.id);
-  const lineColors = useOrdinalScale({domain: ids, range: schemeSet1 })
+  const lineColors = useOrdinalScale({ range: schemeSet1 })
 
-  const graphData = allData.map(d => {
-    const start = d.initialReading || +d.data[0].weight;
-    const data = d.data.map(e => ({ ...e, weight: +e.weight, relative: +e.weight - start, datetime: Date.parse(e.datetime)}))
-    
-    return {
-      ...d,
-      key: d.id,
-      data,
-      color: lineColors(d.id) 
-    }
-  })
-
+  const graphData = useWeightData({includeHistory: true})
+    .map(d => formatDataForGraph(d, lineColors))
 
   return (
     <>
