@@ -4,15 +4,15 @@ self.__precacheManifest = [
     "url": "/have-a-cookie/static/js/runtime~main.1c6db704.js"
   },
   {
-    "revision": "eaf5332b8d8df18eb892",
-    "url": "/have-a-cookie/static/js/main.50e5053d.chunk.js"
+    "revision": "e9812d1c42007158d04e",
+    "url": "/have-a-cookie/static/js/main.70a4403a.chunk.js"
   },
   {
     "revision": "7a1c63b508d0178a7993",
     "url": "/have-a-cookie/static/js/2.081f5398.chunk.js"
   },
   {
-    "revision": "eaf5332b8d8df18eb892",
+    "revision": "e9812d1c42007158d04e",
     "url": "/have-a-cookie/static/css/main.ad3f95b8.chunk.css"
   },
   {
@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/have-a-cookie/static/css/2.9e22226f.chunk.css"
   },
   {
-    "revision": "e0975050c1643ee89621b1c3ee57b7ac",
+    "revision": "426999de0204e31fd5f3c98432e33aa1",
     "url": "/have-a-cookie/index.html"
   }
 ];
