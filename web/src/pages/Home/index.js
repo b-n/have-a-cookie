@@ -1,11 +1,17 @@
 import React from 'react'
 import { schemeSet1 } from 'd3-scale-chromatic'
+import styled from 'styled-components'
 
 import { useWeightData } from '../../lib'
 import { LineChart } from '../common'
 import { useWindowDimensions, useOrdinalScale } from '../../hooks'
 
 import './Home.css'
+
+const Container = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`
 
 const formatDataForGraph = (d, lineColors) => {
   
@@ -38,35 +44,38 @@ const Home = () => {
     .map(d => formatDataForGraph(d, lineColors))
 
   return (
-    <>
+    <Container>
       <LineChart
         data={graphData.filter(d => d.active)}
         width={width}
-        height={400}
+        height={500}
         yAccessor={d => d.relative}
         xAccessor={d => d.datetime}
         title="Everyone, Relative loss to first reading"
+        className="chart chart-full"
       />
       {graphData.map(d => (
         <LineChart
           key={d.id}
           data={[d]}
-          width={width}
-          height={400}
+          width={width/(width > 1200 ? 2: 1)}
+          height={500}
           yAccessor={d => d.weight}
           xAccessor={d => d.datetime}
           title={d.name}
+          className="chart chart-half"
         />
       ))}
       <LineChart
         title="Inactive relative loss"
         data={graphData.filter(d => !d.active)}
         width={width}
-        height={400}
+        height={500}
         yAccessor={d => d.relative}
         xAccessor={d => d.datetime}
+        className="chart chart-full"
       />
-    </>
+    </Container>
   )
 }
 

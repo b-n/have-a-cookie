@@ -19,7 +19,8 @@ const LineChart = ({
   xAccessor = d => d,
   domainY = 'auto',
   domainX = 'auto',
-  children
+  children,
+  className
 }) => {
 
   const scaleX = useTimeScale({
@@ -44,6 +45,7 @@ const LineChart = ({
       marginLeft={50}
       marginRight={30}
       marginTop={50}
+      className={className}
     >
       <Text className="title" x={10} y={-10}>{title}</Text>
       <AxisBottom

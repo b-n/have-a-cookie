@@ -8,7 +8,8 @@ const Chart = ({
   marginRight = 20,
   marginBottom = 20,
   marginLeft = 20,
-  children
+  children,
+  className
 }) => {
   const chartProps = {
     height,
@@ -19,10 +20,10 @@ const Chart = ({
     marginLeft,
     plotHeight: height - marginTop - marginBottom,
     plotWidth: width - marginLeft - marginRight,
-    clipPathId: "plotArea"
+    clipPathId: "plotArea",
   }
   return (
-    <Svg height={height} width={width}>
+    <Svg height={height} width={width} className={className}>
       <Group transform={{translate: [marginLeft, marginTop ]}}>
         <clipPath id={chartProps.clipPathId}>
           <Rect width={chartProps.plotWidth} height={chartProps.plotHeight} />
