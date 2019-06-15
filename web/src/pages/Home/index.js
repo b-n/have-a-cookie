@@ -1,5 +1,5 @@
 import React from 'react'
-import { schemeSet1 } from 'd3-scale-chromatic'
+import { schemeSet2 } from 'd3-scale-chromatic'
 import styled from 'styled-components'
 
 import { useWeightData } from '../../lib'
@@ -24,6 +24,7 @@ const formatDataForGraph = (d, lineColors) => {
   return {
     ...d,
     key: id,
+    active: d.active !== undefined ? d.active : false,
     data: data.map(e => ({
       ...e,
       weight: +e.weight,
@@ -38,10 +39,11 @@ const Home = () => {
 
   const [ width ] = useWindowDimensions();
 
-  const lineColors = useOrdinalScale({ range: schemeSet1 })
+  const lineColors = useOrdinalScale({ range: schemeSet2 })
 
   const graphData = useWeightData({includeHistory: true})
     .map(d => formatDataForGraph(d, lineColors))
+  graphData.sort((a,b) => b.active - a.active)
 
   return (
     <Container>
