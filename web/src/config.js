@@ -1,6 +1,11 @@
-/* global process */
-const config = {
-    server_url: process.env.SERVER_URL || 'http://localhost:8080',
+const dev = {
+  endpoint: 'https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/'
 }
 
-export default config
+const prod = {
+  endpoint: 'https://mvpreedxy0.execute-api.eu-central-1.amazonaws.com/dev/'
+}
+
+const config = process.env.NODE_ENV === 'development' ? dev : prod;
+
+export { config }
